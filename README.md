@@ -1,6 +1,6 @@
 # MultiAgent Insurance Claims Triage Assistant on Azure AI Foundry
 
-**Start here:** explore the [five-minute project guide](docs/00-reviewer-start-here.md), [architecture](docs/02-architecture.md), and [requirement evidence](docs/11-coverage.md). To run a demo, follow the [ten-minute walkthrough](docs/10-interview.md) or [Streamlit walkthrough](docs/13-streamlit-showcase.md).
+**Start here:** explore the [five-minute project guide](docs/00-reviewer-start-here.md), [architecture](docs/02-architecture.md), and [requirement evidence](docs/11-coverage.md). To run a demo, follow the [ten-minute walkthrough](docs/10-project-walkthrough.md) or [Streamlit walkthrough](docs/13-streamlit-showcase.md).
 
 A runnable synthetic property/auto claims assistant with a supervisor, three specialist agents, explicit triage checkpoints, retrieved underwriting knowledge, persistent memory and an adjuster review gate. Python 3.11–3.13; developed and tested with Python 3.12.
 
@@ -87,7 +87,7 @@ The [first GitHub Actions run](https://github.com/Mani-Harsha/insurance-claims-t
 .\.venv\Scripts\python.exe -m mypy src
 ```
 
-The live Azure smoke test is skipped unless `TRIAGE_RUN_LIVE=1` and a provisioned Azure profile are configured. Tests with fake SDK clients validate code behavior, not subscription access or model availability. VS Code launch configurations and tasks are included. See the [10-minute interview demonstration](docs/10-interview.md).
+The live Azure smoke test is skipped unless `TRIAGE_RUN_LIVE=1` and a provisioned Azure profile are configured. Tests with fake SDK clients validate code behavior, not subscription access or model availability. VS Code launch configurations and tasks are included. See the [10-minute project demonstration](docs/10-project-walkthrough.md).
 
 ## Deliverables, in requested order
 
@@ -100,10 +100,10 @@ The live Azure smoke test is skipped unless `TRIAGE_RUN_LIVE=1` and a provisione
 7. [Test cases and scenarios](docs/07-test-scenarios.md), with executable tests in `tests/`
 8. [README and setup/run instructions](README.md)
 9. [Deployment guide and operating limits](docs/09-deployment.md)
-10. [Interview explanation, walkthrough and questions](docs/10-interview.md)
+10. [Project walkthrough and design FAQ](docs/10-project-walkthrough.md)
 11. [Final requirement coverage checklist and verification evidence](docs/11-coverage.md)
 
-For interview study, read the [complete implementation explanation and 36 additional Q&As](docs/12-implementation-and-interview-study-guide.md), then rehearse the shorter [screen-share guide](docs/10-interview.md). The study guide covers requirement mapping, RAG, sample results, technical tradeoffs and verification limits.
+For technical details, read the [implementation guide and design FAQ](docs/12-implementation-guide.md), then follow the [project walkthrough](docs/10-project-walkthrough.md). These guides cover requirement mapping, retrieval, sample results, technical tradeoffs and verification limits.
 
 ## Deliberate boundaries
 

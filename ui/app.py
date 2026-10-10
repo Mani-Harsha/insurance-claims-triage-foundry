@@ -383,7 +383,7 @@ def render_dashboard():
         )
     for title, filename in [
         ("Step-by-step showcase guide", "13-streamlit-showcase.md"),
-        ("Interview study guide", "12-implementation-and-interview-study-guide.md"),
+        ("Implementation guide", "12-implementation-guide.md"),
     ]:
         path = ROOT / "docs" / filename
         if path.exists():

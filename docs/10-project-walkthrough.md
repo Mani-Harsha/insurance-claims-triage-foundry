@@ -1,6 +1,6 @@
-# 10. Interview explanation and screen-share guide
+# 10. Project walkthrough and design FAQ
 
-Start here for a short presentation. Then read the [complete implementation study guide and 36 additional questions with sample answers](12-implementation-and-interview-study-guide.md). Use the [requirement coverage checklist](11-coverage.md) to show evidence for each requirement. Personalize the sample answers to what you have actually studied and demonstrated.
+This guide covers the project architecture, design tradeoffs, code-reading order and a reproducible demonstration. The [implementation guide](12-implementation-guide.md) provides additional technical detail; the [requirement coverage checklist](11-coverage.md) maps behavior to verification evidence.
 
 The later Streamlit addition has a [step-by-step UI showcase guide](13-streamlit-showcase.md). You can now demonstrate uploads, review, conversation, retrieved evidence and the requirements dashboard through that frontend; the CLI walkthrough below remains useful for explaining the underlying code.
 
@@ -79,7 +79,7 @@ Use the actual repository files in this order; locate the named symbols with VS 
 
 ## Ten-minute VS Code demonstration
 
-Before the meeting, install the project and development extras using the README, select the virtual environment as the Python interpreter, and run the local checks. Start in mock mode unless a live Azure project is intentionally configured. Use only the checked-in synthetic fixtures. The VS Code tasks include initialization, triage and test commands; the debugger launches the module directly.
+Before running the demo, install the project and development extras using the README, select the virtual environment as the Python interpreter, and run the local checks. Start in mock mode unless a live Azure project is intentionally configured. Use only the checked-in synthetic fixtures. The VS Code tasks include initialization, triage and test commands; the debugger launches the module directly.
 
 | Time | Screen/action | Explanation |
 |---|---|---|
@@ -109,7 +109,7 @@ python -m pytest -q --basetemp=.pytest-local-tmp
 
 Use the batch identifier and row index returned by triage for the `review` command; consult `python -m claims_triage review --help` for the accepted decision values. Review a clean row, then repeat to demonstrate conflict handling. Avoid repeatedly triaging the same fixture in the same session unless intentionally demonstrating duplicate detection. Do not screen-share `.env` contents, credential caches or bearer tokens.
 
-## Potential interviewer questions and answers
+## Design FAQ
 
 **Why four agents rather than one?** The requirement calls for a supervisor plus three specialists. Their tools and responsibilities differ, so separation also makes role restrictions and failure attribution explicit. A single deterministic service would be simpler if multiagent behavior were not a requirement.
 

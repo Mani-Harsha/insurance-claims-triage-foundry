@@ -169,7 +169,7 @@ Do not delete `var/showcase.db`. SQLite persistence is what makes this demonstra
 2. Filter **Observed in this showcase** to show behaviors demonstrated through the screens.
 3. Filter **Azure / live verification** and explicitly discuss pending live checks.
 4. Download **requirement evidence** and show that every original group has code and test references.
-5. Download the interview guide if needed.
+5. Download the implementation guide for technical details.
 
 Do not try to make every “Not observed yet” cell turn green: documentation, code-driven provisioning and live Azure behaviors need different evidence. A truthful requirements dashboard is more useful than a blanket completion badge.
 

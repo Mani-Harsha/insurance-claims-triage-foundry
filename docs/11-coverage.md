@@ -41,7 +41,7 @@ The entire authoritative `projectdetails.txt` was re-read after implementation, 
 | R31 | Verified within documented scope | Domain/application/ports/adapters; Decimal; fenced leases; reusable validators; sanitized errors | Full pytest suite, Ruff and mypy |
 | R32 | Delivered and executed | Unit, real SQLite/retrieval/API/CLI integration, SDK fake contracts, positive/negative/boundary cases | `tests/`, 40-case scenario catalog, verification report |
 | R33 | Delivered | README, environment example, frozen dependencies, source/API/architecture/setup/run/deployment guidance | Documented CLI commands executed; OpenAPI snapshot generated |
-| R34 | Delivered | Interview overview, decisions, tradeoffs, challenges, code walkthrough and Q&A | `10-interview.md` |
+| R34 | Delivered | Project overview, decisions, tradeoffs, challenges, code walkthrough and FAQ | `10-project-walkthrough.md` |
 | R35 | Completed | Full source requirement re-scan and coverage review; discovered issues corrected before delivery | This checklist and final executed verification report |
 
 ## Corrections made during verification

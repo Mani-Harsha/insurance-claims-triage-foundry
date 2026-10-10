@@ -1,16 +1,16 @@
-# Complete implementation study guide and additional interview answers
+# Implementation guide and technical FAQ
 
-Read this for a detailed understanding of the implemented project, then rehearse the [short presentation and screen-share guide](10-interview.md). The [requirement analysis](01-requirements.md) and [coverage checklist](11-coverage.md) provide the formal source-to-code-to-test mapping. Sample answers describe the checked-in implementation; adapt them to your own understanding and experience rather than claiming something you cannot demonstrate.
+This guide explains the implementation, retrieval design, memory, failure handling and operating limits. Follow the [project walkthrough](10-project-walkthrough.md) for a reproducible demonstration. The [requirement analysis](01-requirements.md) and [coverage checklist](11-coverage.md) provide the source-to-code-to-test mapping.
 
 **Later addition:** a Streamlit frontend and requirements dashboard were added at the user's request. Follow the [UI showcase guide](13-streamlit-showcase.md). The original assignment did not demand a graphical frontend, but one is now available and calls the same authenticated backend.
 
-## 1. Your project introduction
+## 1. Project overview
 
-### Thirty-second answer
+### Summary
 
 > This is a synthetic insurance claims triage backend with a supervisor and three specialists: intake validation, coverage and anomaly checks, and adjuster briefing. The supervisor follows a fixed, auditable workflow. Coverage uses retrieved underwriting rules, and briefings reference persisted earlier claims. A human records the final decision. The local workflow is tested; the real Azure Agent Service adapter is included, but live Azure execution still needs verification.
 
-### Two-minute answer
+### Processing flow
 
 > The input is a JSON or CSV batch of synthetic property or auto claims. First, the intake specialist checks required fields, dates, amounts, policy numbers and duplicate claim IDs. Invalid rows remain visible with documentation requests rather than disappearing from the batch.
 >
@@ -18,13 +18,13 @@ Read this for a detailed understanding of the implemented project, then rehearse
 >
 > The briefing specialist produces a natural-language summary and a constrained next action. SQLite stores messages, evidence, history and human decisions. That supports both conversational follow-ups and historical context across separate runs.
 >
-> The host application owns the sequence and authorization checks. The Azure adapter creates four agents and registers their tools in code. Local mode mocks only the LLM/service transport while actual validation, retrieval, persistence and API operations run. The last recorded verification was 223 passing tests with 96.02 percent statement coverage; the live Azure test was skipped. I can demonstrate the local system and explain the Azure integration without claiming a deployed cloud system.
+> The host application owns the sequence and authorization checks. The Azure adapter creates four agents and registers their tools in code. Local mode mocks only the LLM/service transport while actual validation, retrieval, persistence and API operations run. The recorded local verification has 237 passing tests with 95.32 percent statement coverage; the live Azure test was skipped. See [verification.json](verification.json) for the current evidence and remote CI limitations. A deployed cloud system is not claimed.
 
 ## 2. Requirements translated into implementation
 
-The R numbers below refer to the complete 35-group matrix. This table groups them for a spoken explanation.
+The R numbers below refer to the complete 35-group matrix. This table groups them by implementation area.
 
-| Requirement | What we implemented | How to explain it | Where to show it |
+| Requirement | Implementation | Design rationale | Evidence |
 |---|---|---|---|
 | Synthetic JSON/CSV property/auto input, R01–R02/R26 | Starter JSON/CSV, additive auto records, explicit synthetic declaration | “Both formats reach the same workflow; no actual policyholder data is used.” | `data/`, `ingestion.py`, upload tests |
 | Intake validation, R03–R07 | Required fields, strict dates, policy syntax/existence, duplicates, amount checks; validation tool | “A valid batch envelope can contain invalid rows. Each row retains its issues.” | `domain.validate_claim`, `tools.py` |
@@ -35,7 +35,7 @@ The R numbers below refer to the complete 35-group matrix. This table groups the
 | Memory, R19/R23 | Messages, last-claim pointer, history table, role-specific Azure thread IDs | “Session context resolves follow-ups; durable history supplies prior facts.” | `repository.py`, restart/CLI tests |
 | Azure agents/tools, R20–R22 | Pinned SDK adapter, four agent definitions, five custom function contracts | “Instructions and registrations are in code, not just configured in the portal.” | `azure_runtime.provision`, `tools.definitions` |
 | Failures/observability, R24–R25/R27 | Bounded runs, cancellation attempts, degraded outcomes, structured logs, explicit mock mode | “An outage remains visible and closes the auto-approval recommendation path.” | Failure/timeout tests, console logs |
-| Documentation and quality, R28–R35 | VS Code tasks, CLI/API, architecture/schema/docs, tests and interview material | “Every requirement maps to implementation and verification evidence.” | README, docs 01–11, `verification.json` |
+| Documentation and quality, R28–R35 | VS Code tasks, CLI/API, architecture/schema/docs, tests and technical documentation | “Every requirement maps to implementation and verification evidence.” | README, docs 01–11, `verification.json` |
 
 The source does **not** explicitly require a graphical frontend, payment processing, a particular SQL engine, or a specific Azure model deployment. CLI/API access, SQLite, identifier formats, batch limits and single-tenant bearer authentication are documented design choices. The requirement asks for human checkpoints; the exact restriction on approving a flagged row is our implementation choice.
 
@@ -95,13 +95,13 @@ Provisioning uploads the underwriting markdown, creates a hosted vector store an
 
 Registration alone is **not proof that hosted file search executed**. The routine requires a context-bound function call; it does not force a separate hosted search on every run. Configuration is contract-tested, while live hosted search usage and retrieval quality still need service traces and evaluation.
 
-### A defensible spoken answer
+### Retrieval design summary
 
-> I implemented retrieval over a small versioned underwriting catalog. Locally it uses TF-IDF and cosine similarity, with rule evidence attached to coverage results. I retrieve all eight records to preserve mandatory checks. The Azure adapter also configures hosted file search, but that live path is not verified. The offline summary is deterministic, so I describe it as retrieval-grounded processing rather than claim live LLM generation.
+> Retrieval operates over a small versioned underwriting catalog. Locally it uses TF-IDF and cosine similarity, with rule evidence attached to coverage results. All eight records are retrieved to preserve mandatory checks. The Azure adapter also configures hosted file search, but that live path is not verified. The offline summary uses deterministic templates over retrieved evidence.
 
 ## 5. Code-reading order
 
-| Order | File/symbols | What you should explain |
+| Order | File/symbols | Behavior to inspect |
 |---|---|---|
 | 1 | `ingestion.py`: `parse_claims`, `validate_batch` | Whole-request rejection versus row validation |
 | 2 | `domain.py`: `validate_claim`, `money` | Required fields, dates, duplicates and exact money |
@@ -114,15 +114,15 @@ Registration alone is **not proof that hosted file search executed**. The routin
 | 9 | `ports.py`, `bootstrap.py`, `config.py` | Dependency injection and runtime substitution |
 | 10 | `api.py`, `cli.py`, `tests/` | Entry points and evidence of behavior |
 
-## 6. Thirty-six additional interviewer questions and sample answers
+## 6. Technical FAQ
 
-These extend the 15 questions in the short guide. First-person wording is practice language; use it only for work and understanding you can substantiate.
+These questions expand on the design FAQ in the project walkthrough and describe the checked-in implementation.
 
 ### Scope and architecture
 
-**Q01. How did you ensure requirement completeness?**
+**Q01. How is requirement completeness tracked?**
 
-> I mapped the source into 35 requirement groups before implementation. Each has implementation tasks and verification evidence. I re-read the source after implementation and explicitly separated delivered code from live cloud behavior that has not been verified.
+> The requirement matrix maps the source into 35 groups, each with implementation tasks and verification evidence. The coverage checklist separates delivered code from live cloud behavior that has not been verified.
 
 **Q02. Was a frontend required, and what is available now?**
 
@@ -134,7 +134,7 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q04. Why not use LangGraph?**
 
-> The flow is small enough to express clearly as named application stages, and no orchestration framework was required. I would reconsider when branching, resumable jobs or workflow complexity justified the dependency.
+> The flow is small enough to express clearly as named application stages, and no orchestration framework was required. An orchestration framework may be appropriate when branching, resumable jobs or workflow complexity justify the dependency.
 
 **Q05. What is the difference between an agent, a tool, a routine and memory?**
 
@@ -148,7 +148,7 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q07. Where are your embeddings stored?**
 
-> The local representation is sparse TF-IDF, stored in memory and rebuilt from knowledge files. No neural embedding model is called. Azure provisioning creates a separate hosted file-search vector store; I do not equate that configuration with a verified live retrieval result.
+> The local representation is sparse TF-IDF, stored in memory and rebuilt from knowledge files. No neural embedding model is called. Azure provisioning creates a separate hosted file-search vector store; that configuration does not establish a verified live retrieval result.
 
 **Q08. How do you chunk the documents?**
 
@@ -156,11 +156,11 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q09. Why retrieve all eight rules instead of top three?**
 
-> Similarity ranks relevance but should not exclude a mandatory policy check. Exhaustive retrieval is cheap for eight records. At larger scale I would select mandatory rules through structured applicability and use semantic retrieval for supporting evidence.
+> Similarity ranks relevance but should not exclude a mandatory policy check. Exhaustive retrieval is cheap for eight records. At larger scale, a possible extension is to select mandatory rules through structured applicability and use semantic retrieval for supporting evidence.
 
 **Q10. Is this a rules engine disguised as RAG?**
 
-> Decision logic is deliberately a deterministic rules evaluator. It retrieves external records and cites them, so grounding is real, but I would not claim sophisticated semantic RAG from the local path. The design combines retrieval, auditable evaluation and constrained agent integration.
+> Decision logic is deliberately a deterministic rules evaluator. It retrieves external records and cites them, so grounding is real, but the local path does not demonstrate neural semantic retrieval. The design combines retrieval, auditable evaluation and constrained agent integration.
 
 **Q11. Are all underwriting rules outside code?**
 
@@ -168,7 +168,7 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q12. How would you evaluate retrieval quality?**
 
-> Current tests verify citations, completeness and changed behavior when parameters change. For a larger corpus, I would label claim-to-required-rule pairs and measure whether all mandatory rules are retrieved. I would separately evaluate explanation faithfulness. The current coverage percentage is not a retrieval metric.
+> Current tests verify citations, completeness and changed behavior when parameters change. For a larger corpus, evaluation should label claim-to-required-rule pairs and measure whether all mandatory rules are retrieved, then separately evaluate explanation faithfulness. The current coverage percentage is not a retrieval metric.
 
 **Q13. Does a citation prove correctness?**
 
@@ -180,11 +180,11 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q15. Is generated model language shown to the user?**
 
-> The adapter collects a supplemental narrative, but the application returns the deterministic `build_brief` result. Displaying model prose with grounding and consistency checks would be an additional feature. I would not describe the current user-facing summary as LLM-generated.
+> The adapter collects a supplemental narrative, but the application returns the deterministic `build_brief` result. Displaying model prose with grounding and consistency checks would be an additional feature. The current user-facing summary is not LLM-generated.
 
 **Q16. If the model is constrained, why use it at all?**
 
-> The assignment requires agent-service integration, and this implements roles, tool calling and threads. The deterministic workflow can operate without an LLM. I have not measured an accuracy advantage from model use; I would expand its role only for a demonstrated need and evaluate it.
+> The assignment requires agent-service integration, and this implements roles, tool calling and threads. The deterministic workflow can operate without an LLM. An accuracy advantage from model use has not been measured; expanding its role requires a demonstrated need and evaluation.
 
 ### Validation, memory and claim behavior
 
@@ -256,9 +256,9 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 ### Testing and deployment
 
-**Q33. What does 96.02 percent coverage mean?**
+**Q33. What does 95.32 percent coverage mean?**
 
-> It is statement coverage from the recorded local run, not model accuracy, security assurance or cloud compatibility. The meaningful evidence is behavior: thresholds, future-history exclusions, approval restrictions and failure paths. The report records 223 passes and one skipped live test.
+> It is statement coverage from the recorded local run, not model accuracy, security assurance or cloud compatibility. The meaningful evidence is behavior: thresholds, future-history exclusions, approval restrictions and failure paths. The report records 237 passes and one skipped live test.
 
 **Q34. What is mocked and what is real in tests?**
 
@@ -266,7 +266,7 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 **Q35. How would you scale to thousands of claims?**
 
-> The current limit is 100 rows per batch with synchronous processing. Azure calls can make a batch slow, and throughput has not been benchmarked. I would add durable jobs, queueing, progress APIs and idempotency, then migrate shared storage/concurrency before adding replicas. Parallelism must preserve historical ordering semantics.
+> The current limit is 100 rows per batch with synchronous processing. Azure calls can make a batch slow, and throughput has not been benchmarked. Scaling would require durable jobs, queueing, progress APIs and idempotency, plus shared storage and concurrency control before adding replicas. Parallelism must preserve historical ordering semantics.
 
 **Q36. What remains before claiming production deployment?**
 
@@ -274,12 +274,12 @@ These extend the 15 questions in the short guide. First-person wording is practi
 
 ## 7. Practical demonstration with explanations
 
-Run from the repository root after README setup. These commands use explicit mock mode and a separate persistent interview database. They do not create Azure resources.
+Run from the repository root after README setup. These commands use explicit mock mode and a separate persistent demonstration database. They do not create Azure resources.
 
 ```powershell
 $py = '.\.venv\Scripts\python.exe'
 $env:TRIAGE_MODE = 'mock'
-$env:TRIAGE_DATABASE = 'var/interview.db'
+$env:TRIAGE_DATABASE = 'var/demo.db'
 
 $batch = & $py -m claims_triage triage data/claims.json --synthetic | ConvertFrom-Json
 $batch.results | ForEach-Object {
@@ -311,7 +311,7 @@ The last command intentionally returns an error; explain why before running it. 
 
 For HTTP, follow README token/serve instructions and open `/docs`. Explain that Swagger is an API explorer, not a custom dashboard. Avoid displaying credentials. Use README test commands and the [scenario catalog](07-test-scenarios.md) to demonstrate a specific behavior.
 
-## 8. Rehearsal checklist
+## 8. Demonstration checklist
 
 - Start with the business problem before naming frameworks.
 - Name the four roles and their tools.
@@ -326,4 +326,4 @@ For HTTP, follow README token/serve instructions and open `/docs`. Explain that 
 - Identify which decisions came from the source and which are documented assumptions.
 - Describe one improvement and its tradeoff without presenting it as implemented.
 
-When asked about something outside scope, say: “That is not implemented in this version. The current behavior is X. To add Y, I would change Z and verify it with these tests.” An accurate limitation is easier to defend than an unsupported claim.
+Features outside the documented scope remain unimplemented. Proposed extensions need explicit design changes and verification before being described as supported behavior.

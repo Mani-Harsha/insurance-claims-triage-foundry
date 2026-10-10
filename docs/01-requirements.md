@@ -49,7 +49,7 @@ Every row was inventoried and mapped before source code generation. Status and e
 | R31 | Complete clean/SOLID reusable implementation with validation/errors/edge cases | Quality | Domain/application/adapter separation and dependency injection | Unit/integration tests, lint/type checks |
 | R32 | Unit/integration/positive/negative tests and scenarios | Quality | pytest suites and scenario catalog | Executed report with limitations |
 | R33 | README/setup/run/deployment/API/architecture/assumptions | Deliverable | README and linked numbered documents | Run documented local commands |
-| R34 | Interview overview/decisions/tradeoffs/challenges/code walkthrough/Q&A | Deliverable | Interview and screen-share guide | Document review |
+| R34 | Project overview/decisions/tradeoffs/challenges/code walkthrough/FAQ | Deliverable | Project walkthrough and demo guide | Document review |
 | R35 | Final full source re-scan and coverage/missing-item remediation | Quality | Final audit and explicit residual verification limits | `11-coverage.md` |
 
 ## Additional interface, database, and operational contracts

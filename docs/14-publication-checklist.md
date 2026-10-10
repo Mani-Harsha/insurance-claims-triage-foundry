@@ -8,7 +8,7 @@ The GitHub repository is intended for public technical review using synthetic da
 - Synthetic claims, policies and memory seeds; versioned underwriting knowledge.
 - Automated tests, dependency locks, CI workflow, Docker and Compose definitions.
 - Safe environment template, editor launch/tasks and Streamlit display configuration.
-- Text assignment, requirement mapping, architecture, database/API design, setup and interview guides.
+- Text assignment, requirement mapping, architecture, database/API design, setup and project guides.
 - A sanitized verification summary. Runtime output and session state remain local.
 
 ## Excluded
