@@ -1,0 +1,24 @@
+services:
+  claims:
+    build: .
+    image: claims-triage:1.0.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      TRIAGE_MODE: ${TRIAGE_MODE:-mock}
+      TRIAGE_API_TOKEN: ${TRIAGE_API_TOKEN:?Set a random API token}
+      TRIAGE_DATABASE: /app/var/claims.db
+      TRIAGE_AZURE_ENDPOINT: ${TRIAGE_AZURE_ENDPOINT:-}
+      TRIAGE_AZURE_MODEL: ${TRIAGE_AZURE_MODEL:-}
+    volumes:
+      - claims-data:/app/var
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  claims-data:

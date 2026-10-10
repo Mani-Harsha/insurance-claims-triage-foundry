@@ -1,0 +1,69 @@
+MultiAgent Insurance Claims Triage Assistant on Azure AI Foundry
+Build production multiagent solutions on Azure AI Foundry. The systems follow a supervisor + specialist agent architecture, where a router/orchestrator agent delegates to domainspecific agents, each equipped with its own skills (tools/functions), memory (conversation + longterm), and knowledge (grounded retrieval), coordinated through explicit routines (deterministic control flow layered on top of LLM reasoning).
+
+Scenario
+You are building a "Claims Triage Assistant"  a multiagent system that helps an insurance claims handler process a batch of incoming property/auto claims. You will use synthetic data provided below (or generate your own equivalent)  no real policyholder or claims data should be used or invented as if real.
+
+The system must handle three tasks, each mapped to a specialist agent:
+
+1. Intake & Validation Agent
+Ingests a set of claim submissions (CSV/JSON provided) and flags claims with missing required fields, inconsistent dates (e.g., loss date after report date), invalid policy numbers, or duplicate claim IDs.
+Exposes this as a skill/tool.
+
+2. Anomaly & Coverage Agent
+Crosschecks each claim against the policyholder's coverage record (mock dataset) to confirm the claim type is covered, the claim amount is within policy limits, and the loss date falls within the active policy period.
+Must use knowledge grounding  e.g., a small local knowledge base (markdown/JSON docs) describing underwriting rules and historical fraud indicator patterns, retrieved via file search / vector store, not hardcoded into the prompt.
+
+
+3. Adjuster Briefing Agent
+Given the outputs of the two agents above, produces a natural language claim summary and recommended next action (auto approve, route to investigator, request more documentation) suitable for a claims adjuster to review.
+Must reference memory from earlier in the session (e.g., "this policyholder had a similar water damage claim flagged 6 months ago" simulate this with a simple persisted memory store).
+
+A Supervisor Agent must:
+Route incoming user requests ("triage this batch of claims", "why was claim C2031 flagged?") to the correct specialist agent(s).
+Maintain a routine  an explicit, inspectable sequence of steps (not just "let the LLM decide everything") that governs how a full triage cycle proceeds: intake → validate → check coverage/anomalies → brief the adjuster, with defined checkpoints/HITL gates.
+Handle multiturn conversation, preserving context across turns (this is where memory thread level and persisted should show up).
+
+
+Technical Requirements
+Area	Requirement
+Platform	Azure AI Foundry (Foundry project, Agent Service). Use the azure-ai-projects / azure-ai-agents Python SDK, or the equivalent .NET/C# SDK.
+Agents	Minimum 4 agents: Supervisor + 3 specialists, created programmatically (not just in the Foundry portal UI) — SDK-driven agent creation, instructions, and tool registration must be in code.
+Skills/Tools	At least 3 custom function tools (skills), properly defined with JSON schemas, registered to the correct agent(s).
+Memory	Demonstrate both: (a) short-term thread/conversation memory across multi-turn interaction, and (b) a simple long-term memory mechanism (can be a local vector store, JSON file, or Azure AI Search index) that persists across separate runs.
+Knowledge	At least one agent must ground its answers in a retrieval source (file search / vector store / Azure AI Search) rather than relying purely on prompt instructions or model priors.
+Routines/Orchestration	The supervisor's control flow must be explicit and traceable in code (a state machine, an orchestration graph, or clearly logged step sequence) — not a black-box single prompt asking the LLM to "figure it out."
+Error handling	Graceful handling of at least one failure mode (e.g., malformed input data, a tool call failure, an agent timeout).
+Observability	Basic logging/tracing of agent decisions and tool calls (console logs are fine; bonus for Foundry tracing/OpenTelemetry integration).
+
+
+
+Sample Data (starter point — feel free to extend)
+
+```json
+// claims.json
+[
+  {"claim_id": "C-2031", "policy_number": "POL-5521", "claim_type": "water_damage", "loss_date": "2026-08-15", "report_date": "2026-08-16", "claim_amount": 8500, "description": "Pipe burst in kitchen"},
+  {"claim_id": "C-2032", "policy_number": "POL-5521", "claim_type": "water_damage", "loss_date": "2026-02-10", "report_date": "2026-02-12", "claim_amount": 4200, "description": "Basement flooding"},
+  {"claim_id": "C-2033", "policy_number": "POL-9981", "claim_type": "theft", "loss_date": "2026-08-30", "report_date": "2026-08-30", "claim_amount": 25000, "description": "Jewelry theft, filed 3 days after policy start"},
+  {"claim_id": "C-2034", "policy_number": "POL-4410", "claim_type": "fire", "loss_date": "", "report_date": "2026-08-20", "claim_amount": 0, "description": "Missing loss date and amount - flag"}
+]
+```
+
+```json
+// policy_coverage.json
+[
+  {"policy_number": "POL-5521", "coverage_type": "homeowners", "policy_limit": 50000, "active_from": "2025-01-01", "active_to": "2026-12-31"},
+  {"policy_number": "POL-9981", "coverage_type": "homeowners", "policy_limit": 25000, "active_from": "2026-08-27", "active_to": "2027-08-27"},
+  {"policy_number": "POL-4410", "coverage_type": "homeowners", "policy_limit": 40000, "active_from": "2024-01-01", "active_to": "2026-01-01"}
+]
+```
+
+A small `knowledge/underwriting_rules.md` with 5–10 short rules/patterns (e.g., "Claims filed within 7 days of policy inception should be flagged for review regardless of amount" or "Claim amounts within 2% of the policy limit warrant an investigator review") should be included for the knowledge-grounding requirement.
+
+
+Note –
+- Use of AI coding assistants (Copilot, Claude, etc.) is allowed and expected — we care about the resulting architecture and your ability to explain/defend it, not whether every line was hand-typed.
+- All data is synthetic; no real policyholder or claims data should be used or invented as if real.
+- It's preferable to use the Visual Studio Code (VS Code) editor. During the meeting, the candidate should share their screen and walk through the case study.
+- If you run into Azure AI Foundry quota/access issues, mock the LLM calls but keep the SDK integration code intact and note what you mocked and why in the README.

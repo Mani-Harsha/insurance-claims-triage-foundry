@@ -1,0 +1,6 @@
+[
+  {"claim_id":"C-4001","policy_number":"POL-5521","claim_type":"fire","loss_date":"2026-08-10","report_date":"2026-08-11","claim_amount":1000,"description":"Synthetic duplicate row one"},
+  {"claim_id":"C-4001","policy_number":"POL-5521","claim_type":"fire","loss_date":"2026-08-10","report_date":"2026-08-11","claim_amount":2000,"description":"Synthetic duplicate row two"},
+  {"claim_id":"C-4002","policy_number":"POL-0000","claim_type":"theft","loss_date":"2026-08-12","report_date":"2026-08-11","claim_amount":1000,"description":"Synthetic unknown policy and reversed dates"},
+  {"claim_id":"C-4003","policy_number":"bad-policy","claim_type":"fire","loss_date":"","report_date":"2026-08-11","claim_amount":0,"description":"Synthetic missing date, invalid policy and amount"}
+]

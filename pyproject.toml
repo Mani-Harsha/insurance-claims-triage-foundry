@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claims-triage"
+version = "1.0.0"
+description = "Synthetic insurance claims triage with four Azure Foundry agents"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.10,<3",
+  "pydantic-settings>=2.7,<3", "jsonschema>=4.23,<5",
+]
+
+[project.optional-dependencies]
+azure = ["azure-ai-agents==1.1.0", "azure-identity>=1.19,<2"]
+ui = ["streamlit>=1.65,<2", "httpx>=0.28,<1", "numpy>=1.23,<2.5"]
+dev = ["pytest>=8.3,<9", "pytest-cov>=6,<7", "httpx>=0.28,<1", "ruff>=0.9,<1", "mypy>=1.14,<2", "types-jsonschema>=4.23"]
+
+[project.scripts]
+claims-triage = "claims_triage.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/claims_triage"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["live: opt-in tests requiring configured Azure credentials"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+ignore_missing_imports = true
+files = ["src/claims_triage"]

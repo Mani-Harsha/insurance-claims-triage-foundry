@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Claims: synthetic batch (mock)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "claims_triage",
+      "args": ["triage", "data/claims.json", "--synthetic"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": { "TRIAGE_MODE": "mock" }
+    },
+    {
+      "name": "Claims: API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "claims_triage",
+      "args": ["serve"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Claims: tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

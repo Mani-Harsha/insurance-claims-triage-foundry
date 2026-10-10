@@ -1,0 +1,784 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Synthetic Claims Triage",
+    "description": "Single-tenant synthetic claims assistant. All recommendations require a human decision.\n\n## End-to-end showcase\n1. Authorize with the server's bearer token.\n2. POST /sessions and copy session_id.\n3. POST /sessions/{session_id}/batches using the starter example; copy the returned id as batch_id.\n4. POST /sessions/{session_id}/chat with the explanation, then follow-up example.\n5. Review rows 0/1/2/3 as investigate/approve/investigate/request_documentation.\n6. GET the batch again: state becomes REVIEWED after all four decisions.\n\n## Agent functions\n- **supervisor**: `route_request` \u2014 Route the exact current user request through the deterministic supervisor.\n- **intake**: `validate_claim` \u2014 Validate the bound synthetic claim row for missing fields, dates, policy identifiers and duplicates.\n- **coverage**: `check_coverage` \u2014 Retrieve underwriting rules and check the bound claim against policy coverage and earlier history.; `search_knowledge` \u2014 Retrieve cited synthetic underwriting rules from the local file vector index.\n- **briefing**: `build_brief` \u2014 Build an evidence-grounded adjuster brief and a constrained next action for the bound claim row.\n\nThese are internal, context-bound tools invoked by the workflow. Coverage retrieves rules inside check_coverage; search_knowledge is an additional registered tool. Mock mode executes local tools and persistence; it does not prove Azure inference or hosted file search. Use a new session for each independent batch demo to avoid duplicate flags.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_sessions_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/sessions/{session_id}/messages": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Messages",
+        "operationId": "messages_sessions__session_id__messages_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}/batches": {
+      "post": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "Batch",
+        "operationId": "batch_sessions__session_id__batches_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              },
+              "examples": {
+                "starter": {
+                  "summary": "Four synthetic claims: history, clean coverage, anomalies, invalid intake",
+                  "value": {
+                    "synthetic": true,
+                    "claims": [
+                      {
+                        "claim_id": "C-2031",
+                        "policy_number": "POL-5521",
+                        "claim_type": "water_damage",
+                        "loss_date": "2026-08-15",
+                        "report_date": "2026-08-16",
+                        "claim_amount": 8500,
+                        "description": "Pipe burst in kitchen"
+                      },
+                      {
+                        "claim_id": "C-2032",
+                        "policy_number": "POL-5521",
+                        "claim_type": "water_damage",
+                        "loss_date": "2026-02-10",
+                        "report_date": "2026-02-12",
+                        "claim_amount": 4200,
+                        "description": "Basement flooding"
+                      },
+                      {
+                        "claim_id": "C-2033",
+                        "policy_number": "POL-9981",
+                        "claim_type": "theft",
+                        "loss_date": "2026-08-30",
+                        "report_date": "2026-08-30",
+                        "claim_amount": 25000,
+                        "description": "Jewelry theft, filed 3 days after policy start"
+                      },
+                      {
+                        "claim_id": "C-2034",
+                        "policy_number": "POL-4410",
+                        "claim_type": "fire",
+                        "loss_date": "",
+                        "report_date": "2026-08-20",
+                        "claim_amount": 0,
+                        "description": "Missing loss date and amount - flag"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "List Batches",
+        "operationId": "list_batches_sessions__session_id__batches_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}/uploads": {
+      "post": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "Upload",
+        "description": "Paste raw JSON or CSV. Match format to the selected media type and set synthetic=true.",
+        "operationId": "upload_sessions__session_id__uploads_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "type": "string",
+              "title": "Format"
+            }
+          },
+          {
+            "name": "synthetic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Synthetic"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "example": [
+                {
+                  "claim_id": "C-2031",
+                  "policy_number": "POL-5521",
+                  "claim_type": "water_damage",
+                  "loss_date": "2026-08-15",
+                  "report_date": "2026-08-16",
+                  "claim_amount": 8500,
+                  "description": "Pipe burst in kitchen"
+                },
+                {
+                  "claim_id": "C-2032",
+                  "policy_number": "POL-5521",
+                  "claim_type": "water_damage",
+                  "loss_date": "2026-02-10",
+                  "report_date": "2026-02-12",
+                  "claim_amount": 4200,
+                  "description": "Basement flooding"
+                },
+                {
+                  "claim_id": "C-2033",
+                  "policy_number": "POL-9981",
+                  "claim_type": "theft",
+                  "loss_date": "2026-08-30",
+                  "report_date": "2026-08-30",
+                  "claim_amount": 25000,
+                  "description": "Jewelry theft, filed 3 days after policy start"
+                },
+                {
+                  "claim_id": "C-2034",
+                  "policy_number": "POL-4410",
+                  "claim_type": "fire",
+                  "loss_date": "",
+                  "report_date": "2026-08-20",
+                  "claim_amount": 0,
+                  "description": "Missing loss date and amount - flag"
+                }
+              ]
+            },
+            "text/csv": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "claim_id,policy_number,claim_type,loss_date,report_date,claim_amount,description\nC-2032,POL-5521,water_damage,2026-02-10,2026-02-12,4200,Basement flooding\n"
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}/batches/{batch_id}": {
+      "get": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "Get Batch",
+        "operationId": "get_batch_sessions__session_id__batches__batch_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}/chat": {
+      "post": {
+        "tags": [
+          "Conversation"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_sessions__session_id__chat_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              },
+              "examples": {
+                "explain": {
+                  "summary": "Supervisor routes to briefing and stored evidence",
+                  "value": {
+                    "message": "Why was claim C2031 flagged?"
+                  }
+                },
+                "followup": {
+                  "summary": "Follow-up using conversation memory",
+                  "value": {
+                    "message": "Explain its recommendation"
+                  }
+                },
+                "triage": {
+                  "summary": "Supervisor routes a new batch through all specialists",
+                  "value": {
+                    "message": "Triage this batch of claims",
+                    "synthetic": true,
+                    "claims": [
+                      {
+                        "claim_id": "C-2031",
+                        "policy_number": "POL-5521",
+                        "claim_type": "water_damage",
+                        "loss_date": "2026-08-15",
+                        "report_date": "2026-08-16",
+                        "claim_amount": 8500,
+                        "description": "Pipe burst in kitchen"
+                      },
+                      {
+                        "claim_id": "C-2032",
+                        "policy_number": "POL-5521",
+                        "claim_type": "water_damage",
+                        "loss_date": "2026-02-10",
+                        "report_date": "2026-02-12",
+                        "claim_amount": 4200,
+                        "description": "Basement flooding"
+                      },
+                      {
+                        "claim_id": "C-2033",
+                        "policy_number": "POL-9981",
+                        "claim_type": "theft",
+                        "loss_date": "2026-08-30",
+                        "report_date": "2026-08-30",
+                        "claim_amount": 25000,
+                        "description": "Jewelry theft, filed 3 days after policy start"
+                      },
+                      {
+                        "claim_id": "C-2034",
+                        "policy_number": "POL-4410",
+                        "claim_type": "fire",
+                        "loss_date": "",
+                        "report_date": "2026-08-20",
+                        "claim_amount": 0,
+                        "description": "Missing loss date and amount - flag"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}/batches/{batch_id}/reviews/{row_index}": {
+      "post": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Review",
+        "operationId": "review_sessions__session_id__batches__batch_id__reviews__row_index__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "row_index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Row Index"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              },
+              "examples": {
+                "investigate": {
+                  "summary": "Rows 0 and 2: investigate",
+                  "value": {
+                    "decision": "investigate",
+                    "note": "Reviewed synthetic anomaly and history evidence"
+                  }
+                },
+                "approve": {
+                  "summary": "Row 1: clean claim approval",
+                  "value": {
+                    "decision": "approve",
+                    "note": "Reviewed synthetic coverage evidence"
+                  }
+                },
+                "documentation": {
+                  "summary": "Row 3: request missing information",
+                  "value": {
+                    "decision": "request_documentation",
+                    "note": "Please supply the missing loss date and a valid amount"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BatchRequest": {
+        "properties": {
+          "synthetic": {
+            "type": "boolean",
+            "title": "Synthetic"
+          },
+          "claims": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Claims"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "synthetic",
+          "claims"
+        ],
+        "title": "BatchRequest"
+      },
+      "ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Message"
+          },
+          "claims": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claims"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "title": "Synthetic",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ReviewRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "investigate",
+              "request_documentation"
+            ],
+            "title": "Decision"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision",
+          "note"
+        ],
+        "title": "ReviewRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

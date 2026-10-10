@@ -1,0 +1,99 @@
+{
+  "verified_on": "2026-10-10",
+  "environment": {
+    "os": "win32",
+    "python": "3.12.10"
+  },
+  "tests": {
+    "tests": 238,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 237,
+    "duration_seconds": 243.624
+  },
+  "coverage": {
+    "covered_lines": 1018,
+    "num_statements": 1068,
+    "percent": 95.32
+  },
+  "ruff": "passed: src tests tools ui",
+  "mypy": "passed: 17 source files",
+  "requirement_groups_mapped": 35,
+  "documentation_local_links": "passed: README.md and docs/*.md",
+  "source_sha256": "5ef6d07487a5b527e620b9b5eb294d099019e170ed3e603fb6e45dd033d8548f",
+  "requirement_document_sha256": "44286d833102ad2044fe1a05b673d49d05cb11029062c832509bae03ff015c71",
+  "live_azure": "not executed; endpoint/model absent from local configuration; live test skipped",
+  "container": "not executed; Docker Desktop Linux engine pipe unavailable, confirmed outside sandbox",
+  "ci": "workflow delivered; not run in a remote repository",
+  "test_warning": "One upstream Starlette deprecation warning about TestClient httpx support; all HTTP tests passed",
+  "raw_reports": [
+    "var/tests-publish.xml",
+    "var/coverage-publish.json",
+    "var/showcase-smoke.json"
+  ],
+  "dependency_check": "passed: pip check",
+  "source_sha256_method": "Sorted src/**/*.py: concatenate UTF-8 POSIX relative path, NUL, and file bytes",
+  "foundry_prerequisites": "Azure Developer CLI (azd) unavailable; no Azure provisioning attempted",
+  "end_to_end": {
+    "result": "passed",
+    "checks": [
+      "API startup",
+      "Streamlit startup",
+      "HTTP upload",
+      "four expected outcomes",
+      "memory chat",
+      "human decision",
+      "saved batch lookup",
+      "Swagger HTML and upload schema",
+      "conversation follow-up",
+      "unsafe approval rejected",
+      "all four decisions persisted and batch REVIEWED",
+      "Streamlit widgets through real HTTP: triage, chat, review, requirement dashboard"
+    ],
+    "mode": "mock"
+  },
+  "executed_commands": [
+    ".\\.venv\\Scripts\\python.exe -m pytest --basetemp=.pytest-publish-tmp --cov=claims_triage --cov-report=term-missing --cov-report=json:var/coverage-publish.json --junitxml=var/tests-publish.xml",
+    ".\\.venv\\Scripts\\python.exe -m ruff check src tests tools ui",
+    ".\\.venv\\Scripts\\python.exe -m mypy src",
+    ".\\.venv\\Scripts\\python.exe -m pip check",
+    "TRIAGE_MODE=mock TRIAGE_DATABASE=var/publish-smoke.db; python tools/run_showcase.py --api-port 8032 --ui-port 8532 --smoke"
+  ],
+  "agent_functions_observed": [
+    {
+      "agent": "briefing",
+      "tool": "build_brief"
+    },
+    {
+      "agent": "coverage",
+      "tool": "check_coverage"
+    },
+    {
+      "agent": "intake",
+      "tool": "validate_claim"
+    },
+    {
+      "agent": "supervisor",
+      "tool": "route_request"
+    }
+  ],
+  "additional_function_probe": {
+    "function": "search_knowledge",
+    "mode": "local dispatcher with real file retrieval",
+    "result": "passed",
+    "checks": [
+      "UW06 citation returned",
+      "source and knowledge version preserved",
+      "invalid query rejected",
+      "coverage operation not executed"
+    ]
+  },
+  "browser_visual_verification": "not executed: no browser surface available; Streamlit widgets and real HTTP flow passed",
+  "raw_reports_note": "Local-only reports excluded from Git. CI generates its own downloadable test artifacts.",
+  "publication_review": {
+    "date": "2026-10-10",
+    "scope": "Local tests and real HTTP/Streamlit smoke rerun before GitHub publication; live Azure excluded",
+    "source_requirement_note": "Trailing whitespace normalized; requirement wording unchanged."
+  }
+}

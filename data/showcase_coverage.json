@@ -1,0 +1,6 @@
+[
+  {"claim_id":"C-5001","policy_number":"POL-5521","claim_type":"fire","loss_date":"2026-08-10","report_date":"2026-08-11","claim_amount":50000.01,"description":"Synthetic over-limit fire claim"},
+  {"claim_id":"C-5002","policy_number":"POL-4410","claim_type":"fire","loss_date":"2026-08-10","report_date":"2026-08-11","claim_amount":1000,"description":"Synthetic loss outside the active period"},
+  {"claim_id":"C-5003","policy_number":"POL-7000","claim_type":"water_damage","loss_date":"2026-08-10","report_date":"2026-08-11","claim_amount":1000,"description":"Synthetic excluded auto peril"},
+  {"claim_id":"C-5004","policy_number":"POL-7000","claim_type":"collision","loss_date":"2026-06-01","report_date":"2026-08-11","claim_amount":1000,"description":"Synthetic delayed report requiring documentation"}
+]
