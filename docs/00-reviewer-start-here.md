@@ -19,6 +19,8 @@ This project turns a synthetic claims batch into evidence-backed recommendations
 From a fresh checkout, using Python 3.12 and PowerShell:
 
 ```powershell
+git clone https://github.com/Mani-Harsha/insurance-claims-triage-foundry.git
+cd insurance-claims-triage-foundry
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-ui.lock
 .\.venv\Scripts\python.exe -m pip install --no-deps -e .

@@ -23,7 +23,12 @@ Open **http://127.0.0.1:8511**. If the showcase is already running, simply open 
 
 ## Quick start — PowerShell
 
-Run from this repository root:
+Clone the public repository, then run from its root:
+
+```powershell
+git clone https://github.com/Mani-Harsha/insurance-claims-triage-foundry.git
+cd insurance-claims-triage-foundry
+```
 
 ```powershell
 python -m venv .venv
