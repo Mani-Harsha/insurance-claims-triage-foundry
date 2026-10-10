@@ -25,7 +25,7 @@
   "requirement_document_sha256": "44286d833102ad2044fe1a05b673d49d05cb11029062c832509bae03ff015c71",
   "live_azure": "not executed; endpoint/model absent from local configuration; live test skipped",
   "container": "not executed; Docker Desktop Linux engine pipe unavailable, confirmed outside sandbox",
-  "ci": "workflow delivered; not run in a remote repository",
+  "ci": "Attempted on GitHub; account-level runner restriction prevented jobs from starting. No remote test or container result is claimed.",
   "test_warning": "One upstream Starlette deprecation warning about TestClient httpx support; all HTTP tests passed",
   "raw_reports": [
     "var/tests-publish.xml",
@@ -94,6 +94,12 @@
   "publication_review": {
     "date": "2026-10-10",
     "scope": "Local tests and real HTTP/Streamlit smoke rerun before GitHub publication; live Azure excluded",
-    "source_requirement_note": "Trailing whitespace normalized; requirement wording unchanged."
-  }
+    "source_requirement_note": "Trailing whitespace normalized; requirement wording unchanged.",
+    "repository": "https://github.com/Mani-Harsha/insurance-claims-triage-foundry",
+    "visibility": "public; unauthenticated repository HTTP check returned 200",
+    "tracked_files": 72,
+    "credential_pattern_scan": "No matches in selected publication files; runtime data and secrets excluded."
+  },
+  "ci_run_url": "https://github.com/Mani-Harsha/insurance-claims-triage-foundry/actions/runs/38065146876",
+  "ci_source_commit": "74838b92307e319fece7f0a2f57a69c939bf47e5"
 }

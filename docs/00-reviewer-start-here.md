@@ -4,6 +4,8 @@ This project turns a synthetic claims batch into evidence-backed recommendations
 
 **Verified scope:** the application runs locally with a deterministic mock of the LLM/Foundry transport. Validation, retrieval, SQLite persistence, HTTP endpoints, Streamlit controls, and human review execute real application code. The Azure Agent Service adapter is implemented and SDK-contract-tested; live Azure provisioning and inference remain unverified. This follows the mock fallback permitted by [the assignment](../projectdetails.txt).
 
+**Local evidence (10 October 2026):** 237 tests passed, one opt-in Azure test skipped, 95.32% statement coverage; lint, typing and API/Streamlit smoke passed. GitHub CI was attempted, but an account-level runner restriction prevented execution. See [verification details](verification.json).
+
 ## A five-minute review
 
 | Time | Open | What to inspect |

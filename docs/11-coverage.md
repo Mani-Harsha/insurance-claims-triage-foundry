@@ -58,7 +58,7 @@ The entire authoritative `projectdetails.txt` was re-read after implementation, 
 
 1. **Live Azure access/provisioning/inference not executed.** No project endpoint/model/credentials were supplied. The live smoke is skipped by default. Fake-client tests and installed SDK serialization do not prove RBAC, quota, regional support or model behavior.
 2. **Container build/run not executed locally.** Docker CLI exists, but its engine pipe is unavailable (daemon not running). Dockerfile, Compose and CI build job are delivered; a successful image build is not claimed.
-3. **CI and cross-version Linux runs not executed here.** The workflow covers Python 3.11–3.13 and image build when run by the user's repository. Local checks used Windows/Python 3.12.10.
+3. **Remote CI attempted; runners could not start.** The [first GitHub Actions run](https://github.com/Mani-Harsha/insurance-claims-triage-foundry/actions/runs/38065146876) was blocked by an account-level runner restriction before project steps executed. The workflow covers Python 3.11 through 3.13 and container build, but neither remote tests nor container build are verified. Local checks passed on Windows/Python 3.12.10. Once the account restriction is resolved, rerun the failed workflow from the Actions tab.
 4. **OpenTelemetry export is optional in the specification and is not implemented.** Required console logging and durable routine evidence are implemented.
 5. **Operational production certification is not claimed.** Load tests, disaster-recovery drills, identity governance and real insurance compliance need a deployment environment. The implementation is intentionally single-tenant, single-host and synthetic-only, as documented.
 

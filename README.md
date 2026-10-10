@@ -73,6 +73,12 @@ Visit `http://127.0.0.1:8000/docs`, select **Authorize**, and enter the token. C
 
 For configuration, copy `.env.example` to `.env` and supply values, or set `TRIAGE_*` environment variables. Real Azure calls use `TRIAGE_MODE=azure`, `TRIAGE_AZURE_ENDPOINT`, and `TRIAGE_AZURE_MODEL`; see [Azure setup](docs/09-deployment.md). Run `python -m claims_triage provision` once to create the four agents, their JSON-schema tools, and file-search vector store. Provisioning resumes from saved resource IDs. Invocation never silently changes from Azure mode to mock mode.
 
+## Verification status
+
+Verified locally on **10 October 2026** with Python 3.12: **237 tests passed, 1 live-Azure test skipped, 95.32% statement coverage**. Ruff, mypy, dependency consistency, and the real HTTP/Streamlit smoke workflow passed. See the [recorded evidence](docs/verification.json).
+
+The [first GitHub Actions run](https://github.com/Mani-Harsha/insurance-claims-triage-foundry/actions/runs/38065146876) could not start its runners because of an account-level restriction. Remote Linux tests and the container build remain unverified. Live Azure also remains pending; these are not represented as passing checks.
+
 ## Verify
 
 ```powershell
