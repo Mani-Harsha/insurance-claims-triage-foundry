@@ -6,6 +6,8 @@ Local execution and automated tests are the verified baseline. Live Azure provis
 
 You need Python 3.11–3.13; for containers Docker with Linux containers. Azure mode additionally requires an existing Foundry project endpoint, a model deployment supporting function tools/file search, and Entra credentials with appropriate project permissions. Follow Microsoft's [Agent Service setup](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/environment-setup) and [SDK prerequisites and authentication](https://learn.microsoft.com/en-us/python/api/overview/azure/ai-agents-readme?view=azure-python). Region, model availability and quota are deployment-specific; this project does not assume a subscription or create chargeable resources during local setup.
 
+**Lifecycle planning (10 October 2026):** this guide describes the checked-in classic adapter. Microsoft lists classic agents as deprecated with retirement on March 31, 2027. For a new production deployment, follow the migration plan in the [production-readiness roadmap](15-production-readiness-roadmap.md) before using a current Foundry project. The commands below have not been migrated or verified live. See the [Microsoft lifecycle notice](https://learn.microsoft.com/en-us/azure/foundry-classic/agents/how-to/tools-classic/azure-ai-search-samples).
+
 ## Configure and create Azure agents
 
 Install the frozen dependencies and package as in the README. Authenticate locally with your approved Azure CLI/Entra workflow. In Azure, prefer a managed identity with the minimum project roles documented by Microsoft. Do not store a service-principal password in source control.

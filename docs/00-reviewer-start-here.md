@@ -56,3 +56,5 @@ Use the [full UI guide](13-streamlit-showcase.md) for uploads, restart/persisten
 Read the [ten-minute walkthrough and tradeoffs](10-project-walkthrough.md) or the [detailed implementation guide](12-implementation-guide.md). The [database](03-database.md), [API](04-api.md), [test scenarios](07-test-scenarios.md), and [deployment guide](09-deployment.md) support a deeper review.
 
 Before a production rollout, validate live Azure access/model behavior, deploy identity and RBAC, replace single-host SQLite for distributed operation, add operational monitoring and recovery exercises, and perform domain-specific evaluation. No cloud deployment, throughput benchmark, fraud-detection accuracy, or production certification is claimed here.
+
+The [production-readiness roadmap](15-production-readiness-roadmap.md) separates assignment verification from additional production work, including the Foundry API migration, phased implementation and estimated effort.

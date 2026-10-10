@@ -105,6 +105,8 @@ The live Azure smoke test is skipped unless `TRIAGE_RUN_LIVE=1` and a provisione
 
 For technical details, read the [implementation guide and design FAQ](docs/12-implementation-guide.md), then follow the [project walkthrough](docs/10-project-walkthrough.md). These guides cover requirement mapping, retrieval, sample results, technical tradeoffs and verification limits.
 
+For planned Azure integration and enterprise hardening, see the [production-readiness roadmap](docs/15-production-readiness-roadmap.md): remaining work, implementation sequence, release gates and effort estimates.
+
 ## Deliberate boundaries
 
 SQLite and the token model target a single tenant on one host with persistent local storage. Streamlit was added after the original backend assignment at the user's request. No payment integration, multi-tenant identity system, policy administration integration, or real fraud determination is implemented. Configuration and assumptions are listed in the requirement analysis. Horizontal scaling needs a shared transactional database, distributed concurrency control, identity/RBAC and a background job queue. Cloud readiness also depends on actual Azure smoke testing and deployment-specific operations checks.
