@@ -1,0 +1,28 @@
+flowchart TD
+    accTitle: Claims triage application architecture
+    accDescr: Claim intake, validation, coverage and briefing lead to human review. Versioned knowledge and SQLite provide evidence and memory. All four roles share a runtime port with local mock and Azure choices.
+    UI["Streamlit / CLI"] --> API["Authenticated API /<br/>application service"]
+    API --> S["Supervisor:<br/>route request"]
+    S --> I["Intake:<br/>validate claim"]
+    I --> G{"Validation<br/>checkpoint"}
+    G -->|Valid| C["Coverage and<br/>anomaly specialist"]
+    G -->|Invalid: coverage skipped| B["Adjuster briefing<br/>specialist"]
+    C --> B
+    K["Versioned underwriting<br/>knowledge"] -->|Retrieved rules and citations| C
+    M[("SQLite conversation<br/>and prior-claim memory")] --> B
+    B --> H["Pending<br/>human review"]
+    H --> D["Authenticated<br/>human decision"]
+    D --> M
+    S -.-> R["Runtime port"]
+    R -.-> L["Local deterministic<br/>mock"]
+    R -.-> A["Azure Agent Service:<br/>four agents and<br/>role threads"]
+    A -.-> F["Hosted file-search<br/>vector store"]
+
+    classDef entry fill:#eff6ff,stroke:#60a5fa,color:#17243b
+    classDef agent fill:#f5f3ff,stroke:#a78bfa,color:#17243b
+    classDef evidence fill:#ecfdf5,stroke:#34d399,color:#17243b
+    classDef gate fill:#fffbeb,stroke:#fbbf24,color:#78350f
+    class UI,API entry
+    class S,I,C,B,R,L,A agent
+    class K,M,F evidence
+    class G,H,D gate

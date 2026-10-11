@@ -71,26 +71,9 @@ An indicative schedule is weeks 1-2 for supported Azure execution, weeks 3-4 for
 
 The following is a **proposed** Azure architecture for a replicated internal service. These resources are not currently deployed. A smaller pilot can use the single-host managed-disk pattern in the [deployment guide](09-deployment.md), with documented availability limits.
 
-```mermaid
-flowchart TD
-    U[Named users] --> E[Entra sign-in and HTTPS ingress]
-    E --> UI[Streamlit UI]
-    UI --> API[FastAPI with per-user authorization]
-    API --> DB[(PostgreSQL: sessions, jobs, evidence, reviews)]
-    API --> O[Transactional outbox]
-    O --> Q[Service Bus queue]
-    Q --> W[Worker: explicit supervisor routine]
-    W --> DB
-    W --> F[Current Foundry Agent Service: four roles]
-    W --> K[Versioned underwriting rules and retrieval]
-    F --> R[Approved hosted retrieval source, if used]
-    API --> H[Authorized human review]
-    H --> DB
-    UI -.-> M[Azure Monitor / Application Insights]
-    API -.-> M
-    W -.-> M
-    W -.-> ID[Managed identity and scoped resource access]
-```
+[![Proposed production architecture, not deployed: Entra sign-in, Streamlit, FastAPI, PostgreSQL, an outbox and Service Bus, supervisor workers, Foundry, retrieval, human review, telemetry and managed identity.](assets/production-architecture.png)](assets/production-architecture.svg)
+
+[View full-size diagram](assets/production-architecture.svg) · [Editable Mermaid source](assets/production-architecture.mmd)
 
 Container Apps is one possible UI/API/worker host after storage and job semantics are adapted. Keep PostgreSQL, broker and application access private as required by the chosen network design. Do not deploy several replicas of the current SQLite build or put its WAL database on a network file share. Do not add Kubernetes, multiple vector databases or multi-region failover without a workload requirement.
 

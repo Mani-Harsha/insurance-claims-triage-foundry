@@ -1,24 +1,8 @@
 # 2. Architecture
 
-```mermaid
-flowchart TD
-    UI[Streamlit / CLI] --> API[Authenticated API / application service]
-    API --> S[Supervisor: route request]
-    S --> I[Intake: validate claim]
-    I --> G{Validation checkpoint}
-    G -->|Valid| C[Coverage and anomaly specialist]
-    G -->|Invalid: coverage skipped| B[Adjuster briefing specialist]
-    C --> B
-    K[Versioned underwriting knowledge] -->|Retrieved rules and citations| C
-    M[(SQLite conversation and prior-claim memory)] --> B
-    B --> H[Pending human review]
-    H --> D[Authenticated human decision]
-    D --> M
-    S -.-> R[Runtime port]
-    R -.-> L[Local deterministic mock]
-    R -.-> A[Azure Agent Service: four agents and role threads]
-    A -.-> F[Hosted file-search vector store]
-```
+[![Application architecture showing intake validation, coverage analysis, briefing, human review, knowledge, SQLite memory and the local or Azure runtime choices.](assets/architecture-flow.png)](assets/architecture-flow.svg)
+
+[View full-size diagram](assets/architecture-flow.svg) · [Editable Mermaid source](assets/architecture-flow.mmd)
 
 Solid arrows show the application workflow. Dotted arrows show runtime choices and Azure resources; the runtime port serves all four agent roles. Azure resources are created by the provisioning command, not by starting the local demo.
 

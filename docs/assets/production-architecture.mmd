@@ -1,0 +1,29 @@
+flowchart TD
+    accTitle: Proposed production architecture — not deployed
+    accDescr: Named users access Streamlit and FastAPI through Entra sign-in and HTTPS. PostgreSQL persists sessions, jobs, evidence and reviews. An outbox and Service Bus feed a supervisor worker, Foundry and retrieval. Human review, scoped managed identity and telemetry complete the proposed design.
+    U["Named users"] --> E["Entra sign-in<br/>and HTTPS ingress"]
+    E --> UI["Streamlit UI"]
+    UI --> API["FastAPI with<br/>per-user authorization"]
+    API --> DB[("PostgreSQL: sessions,<br/>jobs, evidence, reviews")]
+    API --> O["Transactional<br/>outbox"]
+    O --> Q["Service Bus<br/>queue"]
+    Q --> W["Worker: explicit<br/>supervisor routine"]
+    W --> DB
+    W --> F["Current Foundry<br/>Agent Service:<br/>four roles"]
+    W --> K["Versioned underwriting<br/>rules and retrieval"]
+    F --> R["Approved hosted<br/>retrieval source,<br/>if used"]
+    API --> H["Authorized<br/>human review"]
+    H --> DB
+    UI -.-> M["Azure Monitor /<br/>Application Insights"]
+    API -.-> M
+    W -.-> M
+    W -.-> ID["Managed identity<br/>and scoped<br/>resource access"]
+
+    classDef entry fill:#eff6ff,stroke:#60a5fa,color:#17243b
+    classDef compute fill:#f5f3ff,stroke:#a78bfa,color:#17243b
+    classDef data fill:#ecfdf5,stroke:#34d399,color:#17243b
+    classDef control fill:#fffbeb,stroke:#fbbf24,color:#78350f
+    class U,E,UI,API entry
+    class W,F compute
+    class DB,O,Q,K,R data
+    class H,M,ID control
