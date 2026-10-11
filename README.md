@@ -1,5 +1,13 @@
 # MultiAgent Insurance Claims Triage Assistant on Azure AI Foundry
 
+Synthetic claims move through four agent roles, retrieved underwriting evidence and a mandatory human review gate. The overview below shows the complete project at a glance.
+
+[![Project architecture: Streamlit and FastAPI or Python CLI feed a supervisor, intake, coverage and briefing workflow, backed by versioned knowledge and SQLite, with a human review gate and local or Azure runtimes.](docs/assets/project-architecture.svg)](docs/assets/project-architecture.svg)
+
+**[View full-size architecture](docs/assets/project-architecture.svg)** · [Technical architecture and design decisions](docs/02-architecture.md) · [Five-minute project guide](docs/00-reviewer-start-here.md)
+
+**Runtime status:** the local demo is verified. The Azure AI Foundry adapter is implemented and contract-tested; live Azure deployment and remote CI/container verification remain pending.
+
 **Start here:** explore the [five-minute project guide](docs/00-reviewer-start-here.md), [architecture](docs/02-architecture.md), and [requirement evidence](docs/11-coverage.md). To run a demo, follow the [ten-minute walkthrough](docs/10-project-walkthrough.md) or [Streamlit walkthrough](docs/13-streamlit-showcase.md).
 
 A runnable synthetic property/auto claims assistant with a supervisor, three specialist agents, explicit triage checkpoints, retrieved underwriting knowledge, persistent memory and an adjuster review gate. Python 3.11–3.13; developed and tested with Python 3.12.
